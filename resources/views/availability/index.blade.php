@@ -53,9 +53,9 @@
                 <div class="mt-3 mb-3">
                     <label class="form-label" for="slot_duration">Slot duration</label>
                     <select id="slot_duration" name="slot_duration" class="form-select">
-                        <option value="30" @selected(old('slot_duration', '30' )==='30' )>30 minutes</option>
-                        <option value="15" @selected(old('slot_duration')==='15' )>15 minutes</option>
-                        <option value="60" @selected(old('slot_duration')==='60' )>60 minutes</option>
+                        <option value="30" @selected(old('slot_duration', '30') === '30')>30 minutes</option>
+                        <option value="15" @selected(old('slot_duration') === '15')>15 minutes</option>
+                        <option value="60" @selected(old('slot_duration') === '60')>60 minutes</option>
                     </select>
                 </div>
 
@@ -72,7 +72,7 @@
             </div>
 
             @php
-            $slotsByDate = $slots->groupBy(fn ($slot) => $slot->available_date->format('Y-m-d'));
+                $slotsByDate = $slots->groupBy(fn($slot) => $slot->available_date->format('Y-m-d'));
             @endphp
 
             <div class="availability-days">
@@ -94,21 +94,21 @@
                     <div id="{{ $dayId }}" class="collapse">
                         <div class="availability-slot-list">
                             @foreach ($dateSlots as $slot)
-                            <div class="availability-slot">
-                                <span class="fw-semibold">{{ substr($slot->available_time, 0, 5) }}</span>
-                                <span
-                                    class="badge {{ $slot->is_booked ? 'text-bg-secondary' : 'bg-success-subtle text-success' }}">
-                                    {{ $slot->is_booked ? 'Booked' : 'Available' }}
-                                </span>
-                                @if (! $slot->is_booked)
-                                <form method="POST" action="{{ route('availability.destroy', $slot) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-link text-danger p-0"
-                                        onclick="return confirm('Remove this slot?')">Remove</button>
-                                </form>
-                                @endif
-                            </div>
+                                <div class="availability-slot">
+                                    <span class="fw-semibold">{{ substr($slot->available_time, 0, 5) }}</span>
+                                    <span
+                                        class="badge {{ $slot->is_booked ? 'text-bg-secondary' : 'bg-success-subtle text-success' }}">
+                                        {{ $slot->is_booked ? 'Booked' : 'Available' }}
+                                    </span>
+                                    @if (!$slot->is_booked)
+                                        <form method="POST" action="{{ route('availability.destroy', $slot) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-link text-danger p-0"
+                                                onclick="return confirm('Remove this slot?')">Remove</button>
+                                        </form>
+                                    @endif
+                                </div>
                             @endforeach
                         </div>
                     </div>

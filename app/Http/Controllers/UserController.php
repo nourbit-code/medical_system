@@ -1,7 +1,77 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\{User,Doctor,Patient}; use Illuminate\Http\Request; use Illuminate\Support\Facades\Hash;
-class UserController extends Controller { public function index(){return view('users.index',['users'=>User::latest()->paginate(10)]);} public function create(){return view('users.create');} public function store(Request $request){$data=$request->validate(['name'=>'required','email'=>'required|email|unique:users','role'=>'required|in:admin,doctor,patient','password'=>'required|confirmed|min:6']);$data['password']=Hash::make($data['password']);$user=User::create($data);$this->createProfile($user);return redirect()->route('users.index')->with('success','User account created successfully.');} public function edit(User $user){return view('users.edit',compact('user'));} public function update(Request $request,User $user){$data=$request->validate(['name'=>'required','email'=>'required|email|unique:users,email,'.$user->id,'role'=>'required|in:admin,doctor,patient','password'=>'nullable|confirmed|min:6']);if($data['password']??false)$data['password']=Hash::make($data['password']);else unset($data['password']);$user->update($data);$this->createProfile($user);return back()->with('success','User account updated successfully.');} public function destroy(User $user){if($user->id===auth()->id())return back()->with('error','You cannot delete your own account.');$user->delete();return back()->with('success','User account deleted successfully.');}
- public function account(){ $user=auth()->user()->load('doctor','patient'); return view('account.edit',compact('user')); }
- public function updateAccount(Request $request){ $user=auth()->user(); $data=$request->validate(['first_name'=>'required|string|max:100','last_name'=>'required|string|max:100','email'=>'required|email|unique:users,email,'.$user->id,'password'=>'nullable|confirmed|min:6']); $user->update(['name'=>$data['first_name'].' '.$data['last_name'],'email'=>$data['email']]); if($data['password']??false)$user->update(['password'=>Hash::make($data['password'])]); if($user->role==='doctor'){ $profile=$request->validate(['phone'=>'required|string|max:50','specialization'=>'required|string|max:150','date_of_birth'=>'nullable|date|before:today']); $user->doctor->update(['first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'email'=>$data['email'],'phone'=>$profile['phone'],'specialization'=>$profile['specialization'],'date_of_birth'=>$profile['date_of_birth']]); } if($user->role==='patient'){ $profile=$request->validate(['phone'=>'required|string|max:50','date_of_birth'=>'nullable|date|before:today','gender'=>'required|in:male,female,other','address'=>'nullable|string|max:500','emergency_contact'=>'nullable|string|max:255']); $user->patient->update(['first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'email'=>$data['email'],'phone'=>$profile['phone'],'date_of_birth'=>$profile['date_of_birth'],'gender'=>$profile['gender'],'address'=>$profile['address'],'emergency_contact'=>$profile['emergency_contact']]); } return back()->with('success','Your account information was updated successfully.'); }
- private function createProfile(User $user){$name=explode(' ',trim($user->name),2);$profile=['user_id'=>$user->id,'first_name'=>$name[0],'last_name'=>$name[1]??'','phone'=>'Not provided','email'=>$user->email];if($user->role==='doctor'&&!$user->doctor)Doctor::create(array_merge($profile,['specialization'=>'General Medicine']));if($user->role==='patient'&&!$user->patient)Patient::create(array_merge($profile,['gender'=>'other']));} }
+use App\Models\{User, Doctor, Patient};
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+class UserController extends Controller
+{
+    public function index()
+    {
+        return view('users.index', ['users' => User::latest()->paginate(10)]);
+    }
+    public function create()
+    {
+        return view('users.create');
+    }
+    public function store(Request $request)
+    {
+        $data = $request->validate(['name' => 'required', 'email' => 'required|email|unique:users', 'role' => 'required|in:admin,doctor,patient', 'password' => 'required|confirmed|min:6']);
+        $data['password'] = Hash::make($data['password']);
+        $user = User::create($data);
+        $this->createProfile($user);
+        return redirect()->route('users.index')->with('success', 'User account created successfully.');
+    }
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate(['name' => 'required', 'email' => 'required|email|unique:users,email,' . $user->id, 'role' => 'required|in:admin,doctor,patient', 'password' => 'nullable|confirmed|min:6']);
+        if ($data['password'] ?? false)
+            $data['password'] = Hash::make($data['password']);
+        else
+            unset($data['password']);
+        $user->update($data);
+        $this->createProfile($user);
+        return back()->with('success', 'User account updated successfully.');
+    }
+    public function destroy(User $user)
+    {
+        if ($user->id === auth()->id())
+            return back()->with('error', 'You cannot delete your own account.');
+        $user->delete();
+        return back()->with('success', 'User account deleted successfully.');
+    }
+    public function account()
+    {
+        $user = auth()->user()->load('doctor', 'patient');
+        return view('account.edit', compact('user'));
+    }
+    public function updateAccount(Request $request)
+    {
+        $user = auth()->user();
+        $data = $request->validate(['first_name' => 'required|string|max:100', 'last_name' => 'required|string|max:100', 'email' => 'required|email|unique:users,email,' . $user->id, 'password' => 'nullable|confirmed|min:6']);
+        $user->update(['name' => $data['first_name'] . ' ' . $data['last_name'], 'email' => $data['email']]);
+        if ($data['password'] ?? false)
+            $user->update(['password' => Hash::make($data['password'])]);
+        if ($user->role === 'doctor') {
+            $profile = $request->validate(['phone' => 'required|string|max:50', 'specialization' => 'required|string|max:150', 'date_of_birth' => 'nullable|date|before:today']);
+            $user->doctor->update(['first_name' => $data['first_name'], 'last_name' => $data['last_name'], 'email' => $data['email'], 'phone' => $profile['phone'], 'specialization' => $profile['specialization'], 'date_of_birth' => $profile['date_of_birth']]);
+        }
+        if ($user->role === 'patient') {
+            $profile = $request->validate(['phone' => 'required|string|max:50', 'date_of_birth' => 'nullable|date|before:today', 'gender' => 'required|in:male,female,other', 'address' => 'nullable|string|max:500', 'emergency_contact' => 'nullable|string|max:255']);
+            $user->patient->update(['first_name' => $data['first_name'], 'last_name' => $data['last_name'], 'email' => $data['email'], 'phone' => $profile['phone'], 'date_of_birth' => $profile['date_of_birth'], 'gender' => $profile['gender'], 'address' => $profile['address'], 'emergency_contact' => $profile['emergency_contact']]);
+        }
+        return back()->with('success', 'Your account information was updated successfully.');
+    }
+    private function createProfile(User $user)
+    {
+        $name = explode(' ', trim($user->name), 2);
+        $profile = ['user_id' => $user->id, 'first_name' => $name[0], 'last_name' => $name[1] ?? '', 'phone' => 'Not provided', 'email' => $user->email];
+        if ($user->role === 'doctor' && !$user->doctor)
+            Doctor::create(array_merge($profile, ['specialization' => 'General Medicine']));
+        if ($user->role === 'patient' && !$user->patient)
+            Patient::create(array_merge($profile, ['gender' => 'other']));
+    }
+}

@@ -9,10 +9,12 @@ class MedicalRecordController extends Controller
 {
     public function create(Appointment $appointment)
     {
-        if (! in_array($appointment->status, ['in_progress', 'completed'])
+        if (
+            !in_array($appointment->status, ['in_progress', 'completed'])
             || (auth()->user()->role === 'doctor'
                 && $appointment->doctor_id !== optional(auth()->user()->doctor)->id)
-            || auth()->user()->role === 'patient') {
+            || auth()->user()->role === 'patient'
+        ) {
             abort(403);
         }
 
@@ -24,10 +26,12 @@ class MedicalRecordController extends Controller
 
     public function store(Request $request, Appointment $appointment)
     {
-        if (! in_array($appointment->status, ['in_progress', 'completed'])
+        if (
+            !in_array($appointment->status, ['in_progress', 'completed'])
             || (auth()->user()->role === 'doctor'
                 && $appointment->doctor_id !== optional(auth()->user()->doctor)->id)
-            || auth()->user()->role === 'patient') {
+            || auth()->user()->role === 'patient'
+        ) {
             abort(403);
         }
 
@@ -64,7 +68,7 @@ class MedicalRecordController extends Controller
             $parts = ['Medicine: ' . $item['medicine']];
 
             foreach (['dose' => 'Dose', 'frequency' => 'Frequency', 'duration' => 'Duration', 'instructions' => 'Instructions'] as $field => $label) {
-                if (! empty($item[$field])) {
+                if (!empty($item[$field])) {
                     $parts[] = $label . ': ' . $item[$field];
                 }
             }
@@ -77,7 +81,7 @@ class MedicalRecordController extends Controller
 
     private function prescriptionItems(?string $prescription): array
     {
-        if (! $prescription) {
+        if (!$prescription) {
             return [[]];
         }
 
@@ -85,7 +89,7 @@ class MedicalRecordController extends Controller
             $item = [];
 
             foreach (explode(' | ', $line) as $part) {
-                if (! str_contains($part, ': ')) {
+                if (!str_contains($part, ': ')) {
                     $item['medicine'] = $part;
                     continue;
                 }

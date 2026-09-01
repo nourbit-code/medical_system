@@ -44,7 +44,7 @@ class DashboardController extends Controller
     {
         $doctor = $user->doctor;
 
-        if (! $doctor) {
+        if (!$doctor) {
             return view('dashboard.doctor', [
                 'doctor' => null,
                 'appointments' => collect(),
@@ -81,7 +81,7 @@ class DashboardController extends Controller
     {
         $patient = $user->patient;
 
-        if (! $patient) {
+        if (!$patient) {
             return view('dashboard.patient', [
                 'patient' => null,
                 'appointments' => collect(),

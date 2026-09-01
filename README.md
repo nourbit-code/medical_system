@@ -1,64 +1,225 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# CarePoint Clinic Management System
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+نظام بسيط لإدارة عيادة طبية مبني باستخدام Laravel وPHP وBlade وMySQL وHTML وCSS وBootstrap 5.
 
-## About Laravel
+## الأدوار
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- `admin`: إدارة الحسابات والأطباء والمرضى والمواعيد.
+- `doctor`: إدارة المواعيد المتاحة، مواعيده، المرضى، والـEMR.
+- `patient`: حجز مواعيد الأطباء المتاحة وعرض الزيارات والسجل الطبي الخاص به.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## بيانات Admin الافتراضية
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```text
+Email: admin@carepoint.test
+Password: Set this only in your local environment
+```
 
-## Learning Laravel
+يتم إنشاء الحساب من `database/seeders/DatabaseSeeder.php`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## System Flow
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```text
+Login / Register
+        ↓
+Dashboard حسب Role
+        ↓
+Doctor creates available slots
+        ↓
+Patient chooses Doctor ثم Slot
+        ↓
+Appointment is created and the slot becomes booked
+        ↓
+Doctor starts the appointment
+        ↓
+Doctor saves diagnosis, treatment, and prescription
+        ↓
+Appointment becomes completed
+        ↓
+EMR appears in appointment details and patient history
+```
 
-## Laravel Sponsors
+## Requirements and XAMPP Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- XAMPP with Apache and MySQL
+- PHP and Composer
+- MySQL database named `medical_system`
 
-### Premium Partners
+```bash
+cd C:\xampp\htdocs\medical_system
+composer install
+copy .env.example .env
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Create a database named `medical_system` in phpMyAdmin and set these values in `.env`:
 
-## Contributing
+```env
+APP_NAME="CarePoint Clinic"
+APP_URL=http://127.0.0.1:8000
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=medical_system
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Then run:
 
-## Code of Conduct
+```bash
+php artisan migrate --seed
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Open `http://127.0.0.1:8000`.
 
-## Security Vulnerabilities
+## Main Logic
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+`AuthController` handles authentication. `Authenticate` requires login, and `RoleMiddleware` limits routes to `admin`, `doctor`, or `patient`.
+
+The doctor enters a date, start time, end time, and duration. For example, `10:00` to `12:00` with `30` minutes creates `10:00`, `10:30`, `11:00`, and `11:30`. A patient first chooses a doctor, then sees only that doctor's future unbooked slots. Booking sets `is_booked` to `true`.
+
+The doctor starts an appointment, writes the EMR, and saves diagnosis, treatment, and electronic prescription items. Saving the EMR changes the appointment status to `completed`. The EMR is shown inside appointment details and patient history; the separate EMR Library page is not used.
+
+## Database Tables
+
+- `users`: account name, email, password, and role.
+- `patients`: patient profile and contact data.
+- `doctors`: doctor profile and specialization.
+- `doctor_availabilities`: doctor date/time slots and booking state.
+- `appointments`: patient, doctor, slot, date, time, reason, and status.
+- `medical_records`: diagnosis, symptoms, notes, treatment, and prescription.
+
+Appointment statuses are `pending`, `confirmed`, `in_progress`, `completed`, and `cancelled`.
+
+Foreign keys use safe delete behavior. Patients and doctors with appointments cannot be deleted. A medical record is deleted automatically when its appointment is deleted.
+
+## Eloquent Relationships
+
+```text
+User hasOne Doctor and hasOne Patient
+Patient hasMany Appointments
+Doctor hasMany Appointments and hasMany DoctorAvailability
+Appointment belongsTo Patient, Doctor, and DoctorAvailability
+Appointment hasOne MedicalRecord
+MedicalRecord belongsTo Appointment
+```
+
+The `age` value is calculated from `date_of_birth` by an Eloquent accessor and is not stored separately.
+
+## Controllers
+
+- `AuthController.php`: login, register, and logout.
+- `DashboardController.php`: loads the correct dashboard and database statistics.
+- `UserController.php`: admin user management and current account editing.
+- `PatientController.php`: patient CRUD, search, sorting, and doctor patient history.
+- `DoctorController.php`: doctor CRUD, search, sorting, and doctor details.
+- `AppointmentController.php`: appointment CRUD, access checks, booking, and starting visits.
+- `AvailabilityController.php`: creates time periods and separates them into slots.
+- `MedicalRecordController.php`: creates and updates EMR and electronic prescriptions.
+
+## Important Models
+
+- `User.php`: account data, role, and profile relationships.
+- `Patient.php`: patient data, appointments, and age accessor.
+- `Doctor.php`: doctor data, appointments, slots, and age accessor.
+- `Appointment.php`: appointment relationships and status.
+- `DoctorAvailability.php`: available slots and booking relationship.
+- `MedicalRecord.php`: diagnosis and treatment record for one appointment.
+
+## Routes and Permissions
+
+`routes/web.php` contains public authentication routes and protected application routes. Admin routes manage `users`, `patients`, and `doctors`. Doctor routes manage `availability` and doctor patient history. All roles can access their permitted appointment routes, while only doctors can create EMRs.
+
+## Views and Reusable Components
+
+```text
+resources/views/
+├── layouts/app.blade.php
+├── components/navbar.blade.php
+├── components/flash-messages.blade.php
+├── components/stat-card.blade.php
+├── components/status-badge.blade.php
+├── auth/
+├── dashboard/
+├── users/
+├── patients/
+├── doctors/
+├── doctors/patients/
+├── appointments/
+├── availability/
+├── medical_records/
+└── account/
+```
+
+`layouts/app.blade.php` is the shared layout. `navbar.blade.php` contains the responsive sidebar. `flash-messages.blade.php` displays session messages. `stat-card.blade.php` displays dashboard statistics. `status-badge.blade.php` displays colored appointment statuses.
+
+Page folders contain the standard `index`, `create`, `edit`, `show`, and `form` Blade files where needed. `appointments/show.blade.php` displays appointment data and its EMR. `doctors/patients/show.blade.php` displays the patient profile and past visits.
+
+## CSS and JavaScript
+
+- `public/css/app.css`: CarePoint colors, sidebar, cards, forms, tables, dashboards, and responsive styling.
+- `public/js/app.js`: simple browser interactions such as the mobile sidebar.
+- `resources/js/app.js`: Laravel frontend source entry point.
+- `resources/js/bootstrap.js`: Laravel JavaScript bootstrap file.
+
+Bootstrap 5 is loaded through CDN. The project does not use React, Vue, Inertia, Livewire, APIs, WebSockets, or extra application packages.
+
+## Database and Configuration Files
+
+- `database/migrations/`: creates and updates all tables in order.
+- `database/seeders/DatabaseSeeder.php`: creates the default admin.
+- `database/factories/UserFactory.php`: creates test users.
+- `config/database.php`: reads MySQL settings from `.env`.
+- `config/auth.php`: configures the `User` authentication model.
+- `config/app.php`: application name, locale, and timezone.
+- `config/session.php`: login session configuration.
+- `config/view.php`: Blade configuration.
+- `config/hashing.php`: password hashing configuration.
+- `config/logging.php`: application log configuration.
+- Other files in `config/` are standard Laravel configuration files for cache, mail, queue, filesystems, services, CORS, broadcasting, and Sanctum.
+
+## Other Standard Laravel Files
+
+- `artisan`: Laravel command entry point.
+- `bootstrap/app.php`: starts the application.
+- `public/index.php`: entry point for browser requests.
+- `public/.htaccess`: Apache rewrite rules for XAMPP.
+- `storage/`: logs, sessions, cache, and compiled Blade views.
+- `composer.json`: PHP dependencies.
+- `composer.lock`: exact dependency versions.
+- `package.json` and `webpack.mix.js`: frontend asset metadata.
+- `phpunit.xml` and `tests/`: testing configuration and examples.
+- `.env.example`: safe environment template.
+- `.env`: local secrets; it must not be committed.
+- `.gitignore`: excluded files and folders.
+- `README.md`: project documentation.
+
+## Useful Commands
+
+```bash
+php artisan route:list
+php artisan migrate:status
+php artisan view:cache
+php artisan view:clear
+php artisan config:clear
+php artisan cache:clear
+```
+
+To recreate the local database and admin account during development:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This deletes existing local database data.
+
+## GitHub
+
+[nourbit-code/medical_system](https://github.com/nourbit-code/medical_system)
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Educational Laravel project for learning clinic management, routing, authentication, migrations, Eloquent, controllers, validation, and Blade.
+
