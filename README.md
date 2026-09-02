@@ -144,6 +144,21 @@ MedicalRecord belongsTo Appointment
 
 `routes/web.php` contains public authentication routes and protected application routes. Admin routes manage `users`, `patients`, and `doctors`. Doctor routes manage `availability` and doctor patient history. All roles can access their permitted appointment routes, while only doctors can create EMRs.
 
+## Implemntation
+```text
+Migration
+    ↓
+Database Tables
+    ↓
+Models and Relationships
+    ↓
+Controller
+    ↓
+Route
+    ↓
+Blade View
+```
+
 ## Views and Reusable Components
 
 ```text
