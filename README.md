@@ -90,6 +90,9 @@ The doctor starts an appointment, writes the EMR, and saves diagnosis, treatment
 
 ## Database Tables
 
+<img width="1551" height="1033" alt="ERD" src="https://github.com/user-attachments/assets/88a5d17f-1dcc-4f05-8212-14b10e456675" />
+
+
 - `users`: account name, email, password, and role.
 - `patients`: patient profile and contact data.
 - `doctors`: doctor profile and specialization.
