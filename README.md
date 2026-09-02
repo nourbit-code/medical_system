@@ -43,7 +43,10 @@ Doctor saves diagnosis, treatment, and prescription
 Appointment becomes completed
         ↓
 EMR appears in appointment details and patient history
+
 ```
+<img width="1376" height="768" alt="workflow" src="https://github.com/user-attachments/assets/b9d7283c-1a8d-43d5-b4fe-3f6629070bb1" />
+
 
 ## Requirements and XAMPP Setup
 
@@ -102,11 +105,10 @@ The doctor starts an appointment, writes the EMR, and saves diagnosis, treatment
 - `appointments`: patient, doctor, slot, date, time, reason, and status.
 - `medical_records`: diagnosis, symptoms, notes, treatment, and prescription.
 
-Appointment statuses are `pending`, `confirmed`, `in_progress`, `completed`, and `cancelled`.
+Patients and doctors with appointments cannot be deleted. "ristricted"
+A medical record is deleted automatically when its appointment is deleted. "cascade"
 
-Foreign keys use safe delete behavior. Patients and doctors with appointments cannot be deleted. A medical record is deleted automatically when its appointment is deleted.
-
-## Eloquent Relationships
+## Relationships
 
 ```text
 User hasOne Doctor and hasOne Patient
@@ -117,7 +119,6 @@ Appointment hasOne MedicalRecord
 MedicalRecord belongsTo Appointment
 ```
 
-The `age` value is calculated from `date_of_birth` by an Eloquent accessor and is not stored separately.
 
 ## Controllers
 
