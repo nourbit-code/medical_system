@@ -1,4 +1,10 @@
+
+
+
+
 # CarePoint Clinic Management System
+[<img width="1793" height="887" alt="image" src="https://github.com/user-attachments/assets/508aeb23-f65e-4bdf-be40-5036d0c1a69e" />](https://github.com/user-attachments/assets/fe64da23-acaa-47a9-ae17-703cd1d26d42)
+
 
 نظام بسيط لإدارة عيادة طبية مبني باستخدام Laravel وPHP وBlade وMySQL وHTML وCSS وBootstrap 5.
 
