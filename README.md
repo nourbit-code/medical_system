@@ -90,7 +90,8 @@ The doctor starts an appointment, writes the EMR, and saves diagnosis, treatment
 
 ## Database Tables
 
-<img width="1551" height="1033" alt="Erd (2)" src="https://github.com/user-attachments/assets/41fd67ef-747e-4ad2-bd2d-18330339b1af" />
+<img width="1551" height="1033" alt="Erd (2)" src="https://github.com/user-attachments/assets/7bcd0f91-fdbc-4f66-a54b-45f7b2b65d8c" />
+
 
 
 
